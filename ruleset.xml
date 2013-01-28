@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <ruleset name="Nexus">
- <description>A coding standard based on an early Zend Framework coding standard. Note that this standard is out of date.</description>
+ <description>A coding standard for StyleAx and Nexus.</description>
 
  <!-- Include some sniffs from all around the place -->
  <rule ref="Generic.Functions.OpeningFunctionBraceBsdAllman"/> <!-- see Generic/Docs/Function/OpeningFunctionBraceBsdAllman ( klamer in neu Line) -->
