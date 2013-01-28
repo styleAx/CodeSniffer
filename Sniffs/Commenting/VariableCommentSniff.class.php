@@ -71,83 +71,87 @@ class Nexus_Sniffs_Commenting_VariableCommentSniff extends PHP_CodeSniffer_Stand
 
         $iCommentEnd = $oPhpcsFile->findPrevious($aCommentToken, ($iStackPtr - 3));
 
-        $this->_hasVariableDocComment($oPhpcsFile, $iStackPtr, $aTokens, $iCommentEnd );
+        $bError = $this->_hasVariableDocComment($oPhpcsFile, $iStackPtr, $aTokens, $iCommentEnd );
 
-        $iCommentStart  = ($oPhpcsFile->findPrevious(T_DOC_COMMENT, ($iCommentEnd - 1), null, true) + 1);
-        $iCommentString = $oPhpcsFile->getTokensAsString($iCommentStart, ($iCommentEnd - $iCommentStart + 1));
+        if(!$bError)
+        {
 
-        // Parse the header comment docblock.
-        try {
-            $this->commentParser = new PHP_CodeSniffer_CommentParser_MemberCommentParser($iCommentString, $oPhpcsFile);
-            $this->commentParser->parse();
-        } catch (PHP_CodeSniffer_CommentParser_ParserException $e) {
-            $line = ($e->getLineWithinComment() + $iCommentStart);
-            $oPhpcsFile->addError($e->getMessage(), $line, 'ErrorParsing');
-            return;
-        }
+            $iCommentStart  = ($oPhpcsFile->findPrevious(T_DOC_COMMENT, ($iCommentEnd - 1), null, true) + 1);
+            $iCommentString = $oPhpcsFile->getTokensAsString($iCommentStart, ($iCommentEnd - $iCommentStart + 1));
 
-        $comment = $this->commentParser->getComment();
-        if (is_null($comment) === true) {
-            $error = 'Variable doc comment is empty';
-            $oPhpcsFile->addError($error, $iCommentStart, 'Empty');
-            return;
-        }
-
-        // The first line of the comment should just be the /** code.
-        $eolPos    = strpos($iCommentString, $oPhpcsFile->eolChar);
-        $firstLine = substr($iCommentString, 0, $eolPos);
-        if ($firstLine !== '/**') {
-            $error = 'The open comment tag must be the only content on the line';
-            $oPhpcsFile->addError($error, $iCommentStart, 'ContentAfterOpen');
-        }
-
-        // Check for a comment description.
-        $short = $comment->getShortComment();
-        $long  = '';
-        if (trim($short) === '') {
-            $error = 'Missing short description in variable doc comment';
-            $oPhpcsFile->addError($error, $iCommentStart, 'MissingShort');
-            $newlineCount = 1;
-        } else {
-            // No extra newline before short description.
-            $newlineCount = 0;
-            $newlineSpan  = strspn($short, $oPhpcsFile->eolChar);
-            if ($short !== '' && $newlineSpan > 0) {
-                $error = 'Extra newline(s) found before variable comment short description';
-                $oPhpcsFile->addError($error, ($iCommentStart + 1), 'SpacingBeforeShort');
+            // Parse the header comment docblock.
+            try {
+                $this->commentParser = new PHP_CodeSniffer_CommentParser_MemberCommentParser($iCommentString, $oPhpcsFile);
+                $this->commentParser->parse();
+            } catch (PHP_CodeSniffer_CommentParser_ParserException $e) {
+                $line = ($e->getLineWithinComment() + $iCommentStart);
+                $oPhpcsFile->addError($e->getMessage(), $line, 'ErrorParsing');
+                return;
             }
 
-            $newlineCount = (substr_count($short, $oPhpcsFile->eolChar) + 1);
+            $comment = $this->commentParser->getComment();
+            if (is_null($comment) === true) {
+                $error = 'Variable doc comment is empty';
+                $oPhpcsFile->addError($error, $iCommentStart, 'Empty');
+                return;
+            }
 
-            // Exactly one blank line between short and long description.
-            $long = $comment->getLongComment();
-            if (empty($long) === false) {
-                $between        = $comment->getWhiteSpaceBetween();
-                $newlineBetween = substr_count($between, $oPhpcsFile->eolChar);
-                if ($newlineBetween !== 2) {
-                    $error = 'There must be exactly one blank line between descriptions in variable comment';
-                    $oPhpcsFile->addError($error, ($iCommentStart + $newlineCount + 1), 'SpacingBetween');
+            // The first line of the comment should just be the /** code.
+            $eolPos    = strpos($iCommentString, $oPhpcsFile->eolChar);
+            $firstLine = substr($iCommentString, 0, $eolPos);
+            if ($firstLine !== '/**') {
+                $error = 'The open comment tag must be the only content on the line';
+                $oPhpcsFile->addError($error, $iCommentStart, 'ContentAfterOpen');
+            }
+
+            // Check for a comment description.
+            $short = $comment->getShortComment();
+            $long  = '';
+            if (trim($short) === '') {
+                $error = 'Missing short description in variable doc comment';
+                $oPhpcsFile->addError($error, $iCommentStart, 'MissingShort');
+                $newlineCount = 1;
+            } else {
+                // No extra newline before short description.
+                $newlineCount = 0;
+                $newlineSpan  = strspn($short, $oPhpcsFile->eolChar);
+                if ($short !== '' && $newlineSpan > 0) {
+                    $error = 'Extra newline(s) found before variable comment short description';
+                    $oPhpcsFile->addError($error, ($iCommentStart + 1), 'SpacingBeforeShort');
                 }
+
+                $newlineCount = (substr_count($short, $oPhpcsFile->eolChar) + 1);
+
+                // Exactly one blank line between short and long description.
+                $long = $comment->getLongComment();
+                if (empty($long) === false) {
+                    $between        = $comment->getWhiteSpaceBetween();
+                    $newlineBetween = substr_count($between, $oPhpcsFile->eolChar);
+                    if ($newlineBetween !== 2) {
+                        $error = 'There must be exactly one blank line between descriptions in variable comment';
+                        $oPhpcsFile->addError($error, ($iCommentStart + $newlineCount + 1), 'SpacingBetween');
+                    }
+                }//end if
+
             }//end if
 
-        }//end if
 
+            // Check each tag.
+            $this->processVar($iCommentStart, $iCommentEnd);
+            $this->processSees($iCommentStart);
 
-        // Check each tag.
-        $this->processVar($iCommentStart, $iCommentEnd);
-        $this->processSees($iCommentStart);
-
-        // The last content should be a newline and the content before
-        // that should not be blank. If there is more blank space
-        // then they have additional blank lines at the end of the comment.
-        $words   = $this->commentParser->getWords();
-        $lastPos = (count($words) - 1);
-        if (trim($words[($lastPos - 1)]) !== ''
-            || strpos($words[($lastPos - 1)], $this->currentFile->eolChar) === false
-            || trim($words[($lastPos - 2)]) === ''
-        ) {
-            $error = 'Additional blank lines found at end of variable comment';
-            $this->currentFile->addError($error, $iCommentEnd, 'SpacingAfter');
+            // The last content should be a newline and the content before
+            // that should not be blank. If there is more blank space
+            // then they have additional blank lines at the end of the comment.
+            $words   = $this->commentParser->getWords();
+            $lastPos = (count($words) - 1);
+            if (trim($words[($lastPos - 1)]) !== ''
+                || strpos($words[($lastPos - 1)], $this->currentFile->eolChar) === false
+                || trim($words[($lastPos - 2)]) === ''
+            ) {
+                $error = 'Additional blank lines found at end of variable comment';
+                $this->currentFile->addError($error, $iCommentEnd, 'SpacingAfter');
+            }
         }
 
     }
@@ -168,33 +172,57 @@ class Nexus_Sniffs_Commenting_VariableCommentSniff extends PHP_CodeSniffer_Stand
                                               array $aTokens,
                                               $iCommentEnd )
     {
+
         if ($iCommentEnd !== false && $aTokens[$iCommentEnd]['code'] === T_COMMENT)
         {
-            $oPhpcsFile->addError('You must use "/**" style comments for a variable comment', $iStackPtr, 'WrongStyle');
-            return;
-        } else if ($iCommentEnd === false || $aTokens[$iCommentEnd]['code'] !== T_DOC_COMMENT) {
-            $oPhpcsFile->addError('Missing variable doc comment', $iStackPtr, 'Missing');
-            return;
-        } else {
-            // Make sure the comment we have found belongs to us.
-            $iCommentFor = $oPhpcsFile->findNext(array(T_VARIABLE, T_CLASS, T_INTERFACE), ($iCommentEnd + 1));
-            if ($iCommentFor !== $iStackPtr) {
-                $oPhpcsFile->addError('Missing variable doc comment', $iStackPtr, 'Missing');
-                return;
-            }
+           $bError = $this->_addErrorMeldung(
+                                'You must use "/**" style comments for a variable comment',
+                                $iStackPtr,
+                                'WrongStyle',
+                                array()
+            );
         }
-    }
-
-    protected function _addErrorMeldung(PHP_CodeSniffer_File $oPhpcsFile, $iStackPtr, $sMessage, $sErrorTitle, $bIsWarning = false)
-    {
-        if($bIsWarning)
+        else if ($iCommentEnd === false || $aTokens[$iCommentEnd]['code'] !== T_DOC_COMMENT)
         {
-
+            $bError = $this->_addErrorMeldung('Missing variable doc comment', $iStackPtr, 'Missing', array());
         }
         else
         {
-
+            $bError = $this->_checkVariableDocCommentMore($oPhpcsFile, $iStackPtr, $iCommentEnd );
         }
+        return $bError;
+    }
+
+    /**
+     * Make sure the comment we have found belongs to us.
+     *
+     * @author Rafal Wesolowski <wesolowski@nexus-netsoft.com>
+     * @param  PHP_CodeSniffer_File $oPhpcsFile  [Description]
+     * @param  integer              $iStackPtr   [Description]
+     * @param  integer              $iCommentEnd [Description]
+     * @return boolean
+     */
+    protected function _checkVariableDocCommentMore(PHP_CodeSniffer_File $oPhpcsFile, $iStackPtr, $iCommentEnd )
+    {
+
+        $iCommentFor = $oPhpcsFile->findNext(array(T_VARIABLE, T_CLASS, T_INTERFACE), ($iCommentEnd + 1));
+        return ($iCommentFor !== $iStackPtr) ?
+                            $this->_addErrorMeldung('Missing variable doc comment', $iStackPtr, 'MissingTwo', array())
+                            :
+                            false;
+    }
+
+    protected function _addErrorMeldung(PHP_CodeSniffer_File $oPhpcsFile, $iStackPtr, $sMessage, $sErrorTitle, array $aData, $bIsWarning = false)
+    {
+        if($bIsWarning)
+        {
+            $oPhpcsFile->addWarning($sMessage, $iStackPtr, $sErrorTitle, $aData);
+        }
+        else
+        {
+            $oPhpcsFile->addError($sMessage, $iStackPtr, $sErrorTitle, $aData);
+        }
+        return true;
     }
 
     /**
