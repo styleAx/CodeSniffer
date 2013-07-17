@@ -58,6 +58,8 @@ class Nexus_Sniffs_NamingConventions_ValidVariableNameSniff extends PHP_CodeSnif
             'o' =>'object',
             'r' =>'resource',
             'm' =>'mixed',
+            'd' =>'double',
+            'c' => 'clouser',
     );
 
     /**

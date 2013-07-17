@@ -38,7 +38,7 @@ class Nexus_Sniffs_Metrics_NestingLevelSniff implements PHP_CodeSniffer_Sniff
     public $iNestingLevel = 3;
 
 
-    public $iComplexitySemicolon = 1;
+    public $iComplexitySemicolon = 3;
 
 
     /**
@@ -78,12 +78,16 @@ class Nexus_Sniffs_Metrics_NestingLevelSniff implements PHP_CodeSniffer_Sniff
 
         if($tokens[$stackPtr]['level'] >= $this->iNestingLevel )
         {
+            // print_r($tokens);
+            // echo PHP_EOL . $stackPtr . PHP_EOL;
             $error = 'Nesting level (%s) exceeds allowed maximum of %s';
             $data  = array(
                       $tokens[$stackPtr]['level'],
                       $this->iNestingLevel
                      );
             $phpcsFile->addError($error, $stackPtr, 'MaxExceeded', $data);
+
+
         }
 
         $start = $tokens[$stackPtr]['scope_opener'];

@@ -492,21 +492,6 @@ class Nexus_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_Sn
 
         if (empty($params) === false) {
 
-
-            // Parameters must appear immediately after the comment.
-            //
-            //
-            //
-            // ***********************TEST********************
-            //
-            //
-            //
-            // if ($params[0]->getOrder() !== 2) {
-            //     $error    = 'Parameters must appear immediately after the comment';
-            //     $errorPos = ($params[0]->getLine() + $commentStart);
-            //     $this->currentFile->addError($error, $errorPos, 'SpacingBeforeParams');
-            // }
-
             $previousParam      = null;
             $spaceBeforeVar     = 10000;
             $spaceBeforeComment = 10000;
