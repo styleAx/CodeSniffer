@@ -272,44 +272,7 @@ class Nexus_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
                 return;
             }
 
-            // No extra newline before short description.
-            $short        = $comment->getShortComment();
-            $newlineCount = 0;
-            $newlineSpan  = strspn($short, $phpcsFile->eolChar);
-            if ($short !== '' && $newlineSpan > 0) {
-                $error = 'Extra newline(s) found before file comment short description';
-                $phpcsFile->addError($error, ($commentStart + 1), 'SpacingBefore');
-            }
 
-            $newlineCount = (substr_count($short, $phpcsFile->eolChar) + 1);
-
-            // Exactly one blank line between short and long description.
-            $long = $comment->getLongComment();
-            if (empty($long) === false) {
-                $between        = $comment->getWhiteSpaceBetween();
-                $newlineBetween = substr_count($between, $phpcsFile->eolChar);
-                if ($newlineBetween !== 2) {
-                    $error = 'There must be exactly one blank line between descriptions in file comment';
-                    $phpcsFile->addError($error, ($commentStart + $newlineCount + 1), 'DescriptionSpacing');
-                }
-
-                $newlineCount += $newlineBetween;
-            }
-
-            // Exactly one blank line before tags.
-            $tags = $this->commentParser->getTagOrders();
-            if (count($tags) > 1) {
-                $newlineSpan = $comment->getNewlineAfter();
-                if ($newlineSpan !== 2) {
-                    $error = 'There must be exactly one blank line before the tags in file comment';
-                    if ($long !== '') {
-                        $newlineCount += (substr_count($long, $phpcsFile->eolChar) - $newlineSpan + 1);
-                    }
-
-                    $phpcsFile->addError($error, ($commentStart + $newlineCount), 'SpacingBeforeTags');
-                    $short = rtrim($short, $phpcsFile->eolChar.' ');
-                }
-            }
 
 
             // Check each tag.
@@ -459,31 +422,6 @@ class Nexus_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
             }
         }//end foreach
 
-        foreach ($indentation as $indentInfo) {
-            if ($indentInfo['space'] !== 0
-                && $indentInfo['space'] !== ($longestTag + 1)
-            ) {
-                $expected = (($longestTag - strlen($indentInfo['tag'])) + 1);
-                $space    = ($indentInfo['space'] - strlen($indentInfo['tag']));
-                $error    = '@%s tag comment indented incorrectly; expected %s spaces but found %s';
-                $data     = array(
-                             $indentInfo['tag'],
-                             $expected,
-                             $space,
-                            );
-
-                $getTagMethod = 'get'.ucfirst($indentInfo['tag']);
-
-                if ($this->tags[$indentInfo['tag']]['allow_multiple'] === true) {
-                    $line = $indentInfo['line'];
-                } else {
-                    $tagElem = $this->commentParser->$getTagMethod();
-                    $line    = $tagElem->getLine();
-                }
-
-                $this->currentFile->addError($error, ($commentStart + $line), 'TagIndent', $data);
-            }
-        }
 
     }//end processTags()
 
