@@ -574,9 +574,7 @@ class Nexus_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_Sn
 
                             $typeHint = $realParams[($pos - 1)]['type_hint'];
                             if ($typeHint === '') {
-                                print_r($realParams);
-                                echo $suggestedTypeHint . PHP_EOL;
-                                echo $paramName . PHP_EOL;
+
                                 $error = 'Type hint "%s" missing for %s at position %s';
                                 $data  = array(
                                           $suggestedTypeHint,

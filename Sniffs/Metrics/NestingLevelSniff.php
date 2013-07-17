@@ -89,7 +89,10 @@ class Nexus_Sniffs_Metrics_NestingLevelSniff implements PHP_CodeSniffer_Sniff
 
 
         }
-
+        if( !isset($tokens[$stackPtr]['scope_opener']) && !isset($tokens[$stackPtr]['scope_closer']) )
+        {
+            return;
+        }
         $start = $tokens[$stackPtr]['scope_opener'];
         $end   = $tokens[$stackPtr]['scope_closer'];
 
