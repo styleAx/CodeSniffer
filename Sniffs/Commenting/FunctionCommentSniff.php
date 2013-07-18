@@ -213,6 +213,13 @@ class Nexus_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_Sn
         $this->processParams($commentStart, $commentEnd);
         $this->processSees($commentStart);
         $this->processReturn($commentStart, $commentEnd);
+
+        if(!in_array('author', $this->commentParser->getTagOrders()))
+        {
+            $error = 'Author type missing for @author tag in function comment';
+            $this->currentFile->addError($error, $commentEnd, 'MissingAuthorType');
+        }
+
         $this->processThrows($commentStart);
 
         // Check for a comment description.
@@ -226,23 +233,23 @@ class Nexus_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_Sn
         // No extra newline before short description.
         $newlineCount = 0;
         $newlineSpan  = strspn($short, $phpcsFile->eolChar);
-        if ($short !== '' && $newlineSpan > 0) {
-            $error = 'Extra newline(s) found before function comment short description';
-            $phpcsFile->addError($error, ($commentStart + 1), 'SpacingBeforeShort');
-        }
+        // if ($short !== '' && $newlineSpan > 0) {
+        //     $error = 'Extra newline(s) found before function comment short description';
+        //     $phpcsFile->addError($error, ($commentStart + 1), 'SpacingBeforeShort');
+        // }
 
         $newlineCount = (substr_count($short, $phpcsFile->eolChar) + 1);
 
         // Exactly one blank line between short and long description.
-        $long = $comment->getLongComment();
-        if (empty($long) === false) {
-            $between        = $comment->getWhiteSpaceBetween();
-            $newlineBetween = substr_count($between, $phpcsFile->eolChar);
-            if ($newlineBetween !== 2) {
-                $error = 'There must be exactly one blank line between descriptions in function comment';
-                $phpcsFile->addError($error, ($commentStart + $newlineCount + 1), 'SpacingBetween');
-            }
-        }//end if
+        //$long = $comment->getLongComment();
+        // if (empty($long) === false) {
+        //     $between        = $comment->getWhiteSpaceBetween();
+        //     $newlineBetween = substr_count($between, $phpcsFile->eolChar);
+        //     if ($newlineBetween !== 2) {
+        //         $error = 'There must be exactly one blank line between descriptions in function comment';
+        //         $phpcsFile->addError($error, ($commentStart + $newlineCount + 1), 'SpacingBetween');
+        //     }
+        // }//end if
 
 
         // Check for unknown/deprecated tags.
@@ -520,33 +527,6 @@ class Nexus_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_Sn
                 // Make sure they are in the correct order, and have the correct name.
                 $pos       = $param->getPosition();
                 $paramName = ($param->getVarName() !== '') ? $param->getVarName() : '[ UNKNOWN ]';
-
-                if ($previousParam !== null) {
-                    $previousName = ($previousParam->getVarName() !== '') ? $previousParam->getVarName() : 'UNKNOWN';
-
-                    // Check to see if the parameters align properly.
-                    if ($param->alignsVariableWith($previousParam) === false) {
-                        $error = 'The variable names for parameters %s (%s) and %s (%s) do not align';
-                        $data  = array(
-                                  $previousName,
-                                  ($pos - 1),
-                                  $paramName,
-                                  $pos,
-                                 );
-                        $this->currentFile->addError($error, $errorPos, 'ParameterNamesNotAligned', $data);
-                    }
-
-                    if ($param->alignsCommentWith($previousParam) === false) {
-                        $error = 'The comments for parameters %s (%s) and %s (%s) do not align';
-                        $data  = array(
-                                  $previousName,
-                                  ($pos - 1),
-                                  $paramName,
-                                  $pos,
-                                 );
-                        $this->currentFile->addError($error, $errorPos, 'ParameterCommentsNotAligned', $data);
-                    }
-                }
 
                 // Variable must be one of the supported standard type.
                 $typeNames = explode('|', $param->getType());

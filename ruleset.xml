@@ -5,10 +5,10 @@
  <!-- Include some sniffs from all around the place -->
  <rule ref="Generic.Functions.OpeningFunctionBraceBsdAllman"/> <!-- see Generic/Docs/Function/OpeningFunctionBraceBsdAllman ( klamer in neu Line) -->
  <rule ref="Generic.PHP.DisallowShortOpenTag"/> <!--  Always use <?php ?> -->
-<rule ref="Generic.WhiteSpace.DisallowTabIndent"/>
+<!-- <rule ref="Generic.WhiteSpace.DisallowTabIndent"/> -->
 
 
- <rule ref="PEAR.Classes.ClassDeclaration"/>
+ <!-- <rule ref="PEAR.Classes.ClassDeclaration"/> -->
  <!-- <rule ref="PEAR.ControlStructures.MultiLineConditionSniff"/> -->
 
  <rule ref="PEAR.Functions.ValidDefaultValue"/>

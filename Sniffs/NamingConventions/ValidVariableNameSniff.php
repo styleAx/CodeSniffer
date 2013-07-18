@@ -145,7 +145,7 @@ class Nexus_Sniffs_NamingConventions_ValidVariableNameSniff extends PHP_CodeSnif
         }
 
 
-        if(!in_array( $varName[0], array_keys($this->aDatatypes)) && $varName != 'this')
+        if(!in_array( $varName[0], array_keys($this->aDatatypes)) && $varName != 'this' )
         {
             $error = '"$%s" Incorrect variable naming. Expect $bVar for Boolean, $sVar for String ...';
             $data  = array($originalVarName);
@@ -153,7 +153,7 @@ class Nexus_Sniffs_NamingConventions_ValidVariableNameSniff extends PHP_CodeSnif
         }
 
 // || $varName[1] !== strtoupper($varName[1])
-        if (PHP_CodeSniffer::isCamelCaps($varName, false, true, false) === false ) {
+        if (PHP_CodeSniffer::isCamelCaps($varName, false, true, false) === false || ( $varName[1] !== strtoupper($varName[1]) && $varName != 'this'  ) ) {
             $error = 'Variable "%s" is not in valid camel caps format';
             $data  = array($originalVarName);
             $phpcsFile->addError($error, $stackPtr, 'NotCamelCaps', $data);

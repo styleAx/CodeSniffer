@@ -30,6 +30,16 @@
 class Nexus_Sniffs_Commenting_InlineCommentSniff implements PHP_CodeSniffer_Sniff
 {
 
+    public $aAllowInlineComment = array(
+        'function',
+        'if',
+        'foreach',
+        'while',
+        'else',
+        'elseif',
+        'class'
+    );
+
     /**
      * A list of tokenizers this sniff supports.
      *
@@ -134,9 +144,10 @@ class Nexus_Sniffs_Commenting_InlineCommentSniff implements PHP_CodeSniffer_Snif
             $error  = 'Inline comments are not allowed';
             $phpcsFile->addError($error, $stackPtr, 'WrongStyle');
         }
-        elseif($tokens[$stackPtr]['content']{0} === '/') {
+        elseif($tokens[$stackPtr]['content']{0} === '/' && !in_array(substr(trim($tokens[$stackPtr]['content']), 3), $this->aAllowInlineComment) )
+        {
             $error  = 'Inline comments are not allowed';
-            $phpcsFile->addError($error, $stackPtr, 'InlineComment');
+            $phpcsFile->addWarning($error, $stackPtr, 'InlineComment');
         }
         return;
 

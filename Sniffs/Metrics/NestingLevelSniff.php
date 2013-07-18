@@ -35,12 +35,14 @@ class Nexus_Sniffs_Metrics_NestingLevelSniff implements PHP_CodeSniffer_Sniff
      *
      * @var int
      */
-    public $iNestingLevel = 3;
+    public $iErrorNestingLevel = 5;
 
 
-    public $iComplexitySemicolon = 3;
+    public $iWarningNestingLevel = 3;
 
+    public $iWarningComplexitySemicolon = 5;
 
+    public $iErrorComplexitySemicolon = 8;
     /**
      * Returns an array of tokens this test wants to listen for.
      *
@@ -76,16 +78,29 @@ class Nexus_Sniffs_Metrics_NestingLevelSniff implements PHP_CodeSniffer_Sniff
     {
         $tokens = $phpcsFile->getTokens();
 
-        if($tokens[$stackPtr]['level'] >= $this->iNestingLevel )
+        if($tokens[$stackPtr]['level'] >= $this->iErrorNestingLevel )
         {
             // print_r($tokens);
             // echo PHP_EOL . $stackPtr . PHP_EOL;
             $error = 'Nesting level (%s) exceeds allowed maximum of %s';
             $data  = array(
                       $tokens[$stackPtr]['level'],
-                      $this->iNestingLevel
+                      $this->iErrorNestingLevel
                      );
-            $phpcsFile->addError($error, $stackPtr, 'MaxExceeded', $data);
+            $phpcsFile->addError($error, $stackPtr, 'MaxExceededError', $data);
+
+
+        }
+        elseif($tokens[$stackPtr]['level'] >= $this->iWarningNestingLevel )
+        {
+            // print_r($tokens);
+            // echo PHP_EOL . $stackPtr . PHP_EOL;
+            $error = 'Nesting level (%s) exceeds recommended maximum of %s';
+            $data  = array(
+                      $tokens[$stackPtr]['level'],
+                      $this->iWarningNestingLevel
+                     );
+            $phpcsFile->addWarning($error, $stackPtr, 'MaxExceededWarn', $data);
 
 
         }
@@ -123,14 +138,23 @@ class Nexus_Sniffs_Metrics_NestingLevelSniff implements PHP_CodeSniffer_Sniff
             }
         }
 
-        if($iComplexity > $this->iComplexitySemicolon)
+        if($iComplexity > $this->iErrorComplexitySemicolon)
         {
             $error = 'Nesting Semicolon level (%s) exceeds allowed maximum of %s';
             $data  = array(
                       $iComplexity,
-                      $this->iComplexitySemicolon
+                      $this->iErrorComplexitySemicolon
                      );
-            $phpcsFile->addError($error, $stackPtr, 'MaxSemicolon', $data);
+            $phpcsFile->addError($error, $stackPtr, 'MaxSemicolonError', $data);
+        }
+        elseif ($iComplexity > $this->iWarningComplexitySemicolon)
+        {
+            $error = 'Nesting Semicolon level (%s) exceeds recommended maximum of %s';
+            $data  = array(
+                      $iComplexity,
+                      $this->iWarningComplexitySemicolon
+                     );
+            $phpcsFile->addError($error, $stackPtr, 'MaxSemicolonWarn', $data);
         }
 
     }//end process()
