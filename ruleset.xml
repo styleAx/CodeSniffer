@@ -12,7 +12,7 @@
  <!-- <rule ref="PEAR.ControlStructures.MultiLineConditionSniff"/> -->
 
  <rule ref="PEAR.Functions.ValidDefaultValue"/>
- <rule ref="PEAR.WhiteSpace.ScopeClosingBrace"/>
+ <!-- <rule ref="PEAR.WhiteSpace.ScopeClosingBrace"/> -->
 
 
  <rule ref="Squiz.Functions.GlobalFunction"/>

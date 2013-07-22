@@ -365,17 +365,6 @@ class Nexus_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
             // Check tag order.
             if ($foundIndexes[0] > $orderIndex) {
                 $orderIndex = $foundIndexes[0];
-            } else {
-                if (is_array($tagElement) === true && empty($tagElement) === false) {
-                    $errorPos += $tagElement[0]->getLine();
-                }
-
-                $error = 'The @%s tag is in the wrong order; the tag %s';
-                $data  = array(
-                          $tag,
-                          $info['order_text'],
-                         );
-                $this->currentFile->addError($error, $errorPos, 'WrongTagOrder', $data);
             }
 
             // Store the indentation for checking.
@@ -517,23 +506,6 @@ class Nexus_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
         if (PHP_CodeSniffer::isUnderscoreName($content) === true) {
             return;
         }
-
-        $newContent = str_replace(' ', '_', $content);
-        $newContent = preg_replace('/[^A-Za-z_]/', '', $newContent);
-        $nameBits   = explode('_', $newContent);
-        $firstBit   = array_shift($nameBits);
-        $newName    = strtoupper($firstBit{0}).substr($firstBit, 1).'_';
-        foreach ($nameBits as $bit) {
-            $newName .= strtoupper($bit{0}).substr($bit, 1).'_';
-        }
-
-        $error     = 'Package name "%s" is not valid; consider "%s" instead';
-        $validName = trim($newName, '_');
-        $data      = array(
-                      $content,
-                      $validName,
-                     );
-        $this->currentFile->addError($error, $errorPos, 'InvalidPackage', $data);
 
     }//end processPackage()
 
@@ -695,13 +667,6 @@ class Nexus_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
             if (empty($content) === true) {
                 $error = 'Content missing for @version tag in file comment';
                 $this->currentFile->addError($error, $errorPos, 'EmptyVersion');
-            } else if (strstr($content, 'CVS:') === false
-                && strstr($content, 'SVN:') === false
-                && strstr($content, 'GIT:') === false
-            ) {
-                $error = 'Invalid version "%s" in file comment; consider "CVS: <cvs_id>" or "SVN: <svn_id>" or "GIT: <git_id>" instead';
-                $data  = array($content);
-                $this->currentFile->addWarning($error, $errorPos, 'InvalidVersion', $data);
             }
         }
 
